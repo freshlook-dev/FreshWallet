@@ -1,64 +1,69 @@
 'use client';
 
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, Platform } from 'react-native';
+import { useAuth } from '../../context/AuthContext';
+import { WebView } from 'react-native-webview';
 
 export default function EarnScreen() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Earn Fresh Points</Text>
+  const { user, loading } = useAuth();
 
-      <Text style={styles.subtitle}>
-        Soon you will be able to earn Fresh Points by completing offers,
-        watching videos, and participating in promotions.
-      </Text>
-
-      <View style={styles.card}>
-        <Text style={styles.task}>• Complete partner offers</Text>
-        <Text style={styles.task}>• Visit Fresh Look Aesthetics</Text>
-        <Text style={styles.task}>• Special promotions & bonuses</Text>
+  // While auth is loading
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" />
       </View>
+    );
+  }
 
-      <Text style={styles.note}>
-        🚧 This section is under development
-      </Text>
-    </View>
+  // 🔒 Block if not logged in
+  if (!user) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.text}>
+          Please sign in to access offers.
+        </Text>
+      </View>
+    );
+  }
+
+  // 🔑 BitLabs Offerwall URL (with user id)
+  const offerwallUrl = `https://web.bitlabs.ai/?token=8f2b299-d796-471b-94f8-69bf30lc003d&uid=${user.id}`;
+
+
+  // 🌐 Web fallback (Vercel)
+  if (Platform.OS === 'web') {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.text}>
+          Offerwall is available on the mobile app.
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <WebView
+      source={{ uri: offerwallUrl }}
+      startInLoadingState
+      renderLoading={() => (
+        <View style={styles.center}>
+          <ActivityIndicator size="large" />
+        </View>
+      )}
+    />
   );
 }
 
-/* ================= STYLES ================= */
-
 const styles = StyleSheet.create({
-  container: {
+  center: {
     flex: 1,
-    padding: 24,
     justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: '#FAF8F4',
   },
-  title: {
-    fontSize: 26,
-    fontWeight: '800',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  subtitle: {
-    textAlign: 'center',
-    color: '#666',
-    marginBottom: 24,
-    fontSize: 15,
-  },
-  card: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 12,
-    marginBottom: 20,
-  },
-  task: {
+  text: {
     fontSize: 16,
-    marginBottom: 10,
-  },
-  note: {
-    textAlign: 'center',
-    color: '#999',
-    fontSize: 13,
+    color: '#444',
   },
 });
