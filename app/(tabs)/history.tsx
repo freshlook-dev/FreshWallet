@@ -4,6 +4,7 @@ import {
   StyleSheet,
   FlatList,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useEffect, useState } from 'react';
 import { supabase } from '../../context/supabase';
@@ -65,64 +66,103 @@ export default function RedemptionHistoryScreen() {
 
   const renderItem = ({ item }: { item: Redemption }) => (
     <View style={styles.card}>
-      <Text style={styles.points}>{item.points} pts</Text>
-      <Text style={styles.meta}>
-        User: {item.user_id.slice(0, 8)}…
-      </Text>
-      <Text style={styles.meta}>
-        {new Date(item.redeemed_at).toLocaleString()}
+      <View style={styles.cardHeader}>
+        <Text style={styles.points}>{item.points} pts</Text>
+        <Text style={styles.date}>
+          {new Date(item.redeemed_at).toLocaleString()}
+        </Text>
+      </View>
+
+      <Text style={styles.user}>
+        User ID: {item.user_id.slice(0, 8)}…
       </Text>
     </View>
   );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Redemption History</Text>
+      {/* Header */}
+      <Text style={styles.header}>Redemption History</Text>
+      <Text style={styles.subheader}>
+        Recent redeemed rewards by customers
+      </Text>
 
       {loading ? (
-        <Text style={styles.loading}>Loading…</Text>
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color="#C9A24D" />
+        </View>
       ) : (
         <FlatList
           data={items}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
-          contentContainerStyle={{ paddingBottom: 30 }}
+          contentContainerStyle={{ paddingBottom: 40 }}
+          showsVerticalScrollIndicator={false}
         />
       )}
     </View>
   );
 }
 
+/* ================= STYLES ================= */
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#000',
+    backgroundColor: '#FAF8F4',
+    paddingHorizontal: 20,
+    paddingTop: 32,
   },
-  title: {
-    color: '#fff',
-    fontSize: 24,
+
+  header: {
+    fontSize: 26,
     fontWeight: '700',
-    marginBottom: 16,
+    color: '#1F1F1F',
+    marginBottom: 6,
   },
-  loading: {
-    color: '#ccc',
-    textAlign: 'center',
+  subheader: {
+    fontSize: 15,
+    color: '#6B6B6B',
+    marginBottom: 22,
   },
+
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
   card: {
-    backgroundColor: '#1c1c1c',
-    padding: 14,
-    borderRadius: 12,
-    marginBottom: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 14,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 2,
   },
+
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
   points: {
-    color: '#C9A24D',
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '800',
+    color: '#C9A24D',
   },
-  meta: {
-    color: '#aaa',
-    marginTop: 4,
+
+  date: {
     fontSize: 12,
+    color: '#777',
+  },
+
+  user: {
+    marginTop: 8,
+    fontSize: 13,
+    color: '#555',
   },
 });

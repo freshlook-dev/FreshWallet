@@ -24,68 +24,136 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Profile</Text>
-      <Text style={styles.email}>{user?.email}</Text>
+      {/* Header */}
+      <Text style={styles.header}>Profile</Text>
+      <Text style={styles.subheader}>Your account details</Text>
 
-      {/* 🔐 STAFF ONLY BUTTON */}
-      {(role === 'staff' || role === 'admin') && (
-        <Pressable
-          style={styles.scannerButton}
-          onPress={() => router.push('../scanner')}
-        >
-          <Text style={styles.scannerText}>Open QR Scanner</Text>
-        </Pressable>
-      )}
+      {/* Account Card */}
+      <View style={styles.card}>
+        <Text style={styles.cardLabel}>Signed in as</Text>
+        <Text style={styles.email}>{user?.email}</Text>
 
-      <Pressable
-  style={styles.scannerButton}
-  onPress={() => router.push('/history')}
->
-  <Text style={styles.scannerText}>Redemption History</Text>
-</Pressable>
+        <View style={styles.roleBadge}>
+          <Text style={styles.roleText}>{role.toUpperCase()}</Text>
+        </View>
+      </View>
 
+      {/* Actions */}
+      <View style={styles.actions}>
+        {(role === 'staff' || role === 'admin') && (
+          <Pressable
+            style={styles.actionButton}
+            onPress={() => router.push('../scanner')}
+          >
+            <Text style={styles.actionText}>Open QR Scanner</Text>
+          </Pressable>
+        )}
 
-      <Pressable style={styles.logout} onPress={signOut}>
-        <Text style={styles.logoutText}>Logout</Text>
+        {(role === 'staff' || role === 'admin') && (
+          <Pressable
+            style={styles.actionButton}
+            onPress={() => router.push('/history')}
+          >
+            <Text style={styles.actionText}>Redemption History</Text>
+          </Pressable>
+        )}
+      </View>
+
+      {/* Logout */}
+      <Pressable style={styles.logoutButton} onPress={signOut}>
+        <Text style={styles.logoutText}>Log out</Text>
       </Pressable>
     </View>
   );
 }
 
+/* ================= STYLES ================= */
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
     backgroundColor: '#FAF8F4',
+    paddingHorizontal: 24,
+    paddingTop: 36,
   },
-  title: {
+
+  header: {
     fontSize: 26,
-    fontWeight: 'bold',
-    marginBottom: 8,
+    fontWeight: '700',
+    color: '#1F1F1F',
+    marginBottom: 4,
+  },
+  subheader: {
+    fontSize: 15,
+    color: '#6B6B6B',
+    marginBottom: 28,
+  },
+
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    padding: 22,
+    marginBottom: 28,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 16,
+    elevation: 3,
+  },
+  cardLabel: {
+    fontSize: 13,
+    color: '#777',
+    marginBottom: 6,
   },
   email: {
-    marginBottom: 24,
-    color: '#555',
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2B2B2B',
+    marginBottom: 14,
   },
-  scannerButton: {
-    backgroundColor: '#C9A24D',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 20,
-    alignItems: 'center',
+
+  roleBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#FAF4E8',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
   },
-  scannerText: {
-    color: '#fff',
+  roleText: {
+    fontSize: 12,
     fontWeight: '700',
+    color: '#C9A24D',
   },
-  logout: {
+
+  actions: {
+    gap: 14,
+    marginBottom: 40,
+  },
+  actionButton: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  actionText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#2B2B2B',
+  },
+
+  logoutButton: {
+    marginTop: 'auto',
     backgroundColor: '#2B2B2B',
-    padding: 16,
-    borderRadius: 12,
+    borderRadius: 18,
+    paddingVertical: 16,
     alignItems: 'center',
   },
   logoutText: {
-    color: '#fff',
+    color: '#FFFFFF',
+    fontSize: 16,
     fontWeight: '700',
   },
 });

@@ -8,6 +8,7 @@ import {
   Pressable,
   Modal,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { useEffect, useState } from 'react';
 import { supabase } from '../../context/supabase';
@@ -36,7 +37,6 @@ export default function RewardsScreen() {
   }, [user]);
 
   const loadData = async () => {
-    // ✅ Load wallet balance (CORRECT)
     const { data: wallet } = await supabase
       .from('wallets')
       .select('balance')
@@ -45,7 +45,6 @@ export default function RewardsScreen() {
 
     setPoints(wallet?.balance ?? 0);
 
-    // ✅ Load rewards
     const { data } = await supabase
       .from('rewards')
       .select('*')
@@ -67,7 +66,6 @@ export default function RewardsScreen() {
     try {
       setLoading(true);
 
-      // 🔐 Create one-time redemption token
       const { data, error } = await supabase.rpc('create_redemption', {
         uid: user.id,
         pts: reward.points_required,
@@ -77,8 +75,6 @@ export default function RewardsScreen() {
 
       setQrToken(data);
       setQrVisible(true);
-
-      // Refresh balance
       loadData();
     } catch (err) {
       console.error(err);
@@ -92,66 +88,83 @@ export default function RewardsScreen() {
     const canRedeem = points >= item.points_required;
 
     return (
-      <View style={styles.card}>
-        <Text style={styles.rewardTitle}>{item.title}</Text>
-        <Text style={styles.points}>{item.points_required} points</Text>
-        <Text style={styles.desc}>{item.description}</Text>
+      <View style={styles.rewardCard}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.rewardTitle}>{item.title}</Text>
+          <Text style={styles.rewardDesc}>{item.description}</Text>
+        </View>
 
-        <Pressable
-          disabled={!canRedeem || loading}
-          onPress={() => handleRedeem(item)}
-          style={[
-            styles.button,
-            { backgroundColor: canRedeem ? '#C9A24D' : '#ccc' },
-          ]}
-        >
-          <Text style={styles.buttonText}>
-            {canRedeem ? 'Redeem' : 'Not enough points'}
+        <View style={styles.rewardFooter}>
+          <Text style={styles.rewardPoints}>
+            {item.points_required} pts
           </Text>
-        </Pressable>
+
+          <Pressable
+            disabled={!canRedeem || loading}
+            onPress={() => handleRedeem(item)}
+            style={[
+              styles.redeemButton,
+              !canRedeem && styles.redeemDisabled,
+            ]}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.redeemText}>
+                {canRedeem ? 'Redeem' : 'Locked'}
+              </Text>
+            )}
+          </Pressable>
+        </View>
       </View>
     );
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Redeem Rewards</Text>
-      <Text style={styles.subtitle}>
-        Use your Fresh Points for discounts
+      {/* Header */}
+      <Text style={styles.header}>Rewards</Text>
+      <Text style={styles.subheader}>
+        Redeem your Fresh Points for exclusive benefits
       </Text>
 
+      {/* Balance Card */}
       <View style={styles.balanceCard}>
-        <Text style={styles.balance}>{points}</Text>
-        <Text style={styles.balanceLabel}>Fresh Points</Text>
+        <Text style={styles.balanceValue}>{points}</Text>
+        <Text style={styles.balanceLabel}>Fresh Points Available</Text>
       </View>
 
+      {/* Rewards List */}
       <FlatList
         data={rewards}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        contentContainerStyle={{ paddingBottom: 30 }}
+        contentContainerStyle={{ paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
       />
 
-      {/* 🔳 QR MODAL */}
-      <Modal visible={qrVisible} transparent animationType="slide">
+      {/* QR MODAL */}
+      <Modal visible={qrVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Show this QR to staff</Text>
+            <Text style={styles.modalTitle}>
+              Show this QR to our staff
+            </Text>
 
             {qrToken && <QRCode value={qrToken} size={220} />}
 
-            <Text style={{ marginTop: 10, fontSize: 12, color: '#666' }}>
+            <Text style={styles.modalHint}>
               Valid for 10 minutes • One-time use
             </Text>
 
             <Pressable
-              style={[styles.button, { marginTop: 20 }]}
+              style={[styles.redeemButton, { marginTop: 24 }]}
               onPress={() => {
                 setQrVisible(false);
                 setQrToken(null);
               }}
             >
-              <Text style={styles.buttonText}>Close</Text>
+              <Text style={styles.redeemText}>Close</Text>
             </Pressable>
           </View>
         </View>
@@ -160,87 +173,125 @@ export default function RewardsScreen() {
   );
 }
 
+/* ================= STYLES ================= */
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#000',
+    backgroundColor: '#FAF8F4',
+    paddingHorizontal: 20,
+    paddingTop: 32,
   },
-  title: {
+
+  header: {
     fontSize: 26,
     fontWeight: '700',
-    color: '#fff',
+    color: '#1F1F1F',
+    marginBottom: 6,
   },
-  subtitle: {
-    color: '#ccc',
-    marginBottom: 16,
+  subheader: {
+    fontSize: 15,
+    color: '#6B6B6B',
+    marginBottom: 22,
   },
+
   balanceCard: {
-    backgroundColor: '#2B2B2B',
-    borderRadius: 16,
-    padding: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    paddingVertical: 24,
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 16,
+    elevation: 4,
   },
-  balance: {
-    fontSize: 36,
+  balanceValue: {
+    fontSize: 38,
     fontWeight: '800',
     color: '#C9A24D',
   },
   balanceLabel: {
-    color: '#fff',
-    marginTop: 4,
+    fontSize: 14,
+    color: '#777',
+    marginTop: 6,
   },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 14,
+
+  rewardCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 18,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 2,
   },
   rewardTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '700',
+    color: '#2B2B2B',
+    marginBottom: 6,
   },
-  points: {
-    marginTop: 4,
-    color: '#C9A24D',
-    fontWeight: '600',
+  rewardDesc: {
+    fontSize: 14,
+    color: '#777',
+    lineHeight: 20,
   },
-  desc: {
-    color: '#666',
-    marginVertical: 10,
-  },
-  button: {
-    paddingVertical: 12,
-    borderRadius: 10,
+
+  rewardFooter: {
+    marginTop: 14,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#C9A24D',
   },
-  buttonText: {
-    color: '#fff',
+  rewardPoints: {
+    fontSize: 15,
     fontWeight: '700',
+    color: '#C9A24D',
   },
+
+  redeemButton: {
+    backgroundColor: '#C9A24D',
+    paddingVertical: 10,
+    paddingHorizontal: 22,
+    borderRadius: 14,
+  },
+  redeemDisabled: {
+    backgroundColor: '#DDD',
+  },
+  redeemText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 15,
+  },
+
   modalOverlay: {
     position: Platform.OS === 'web' ? 'fixed' : 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(0,0,0,0.55)',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 9999,
   },
   modalCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    padding: 26,
     alignItems: 'center',
     width: '85%',
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '700',
-    marginBottom: 16,
+    marginBottom: 18,
+    color: '#1F1F1F',
+  },
+  modalHint: {
+    marginTop: 12,
+    fontSize: 12,
+    color: '#777',
   },
 });
