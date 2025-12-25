@@ -18,7 +18,7 @@ export default function DeleteAccountScreen() {
         please follow these steps:
         {'\n\n'}
         1. Send an email to:
-        {'\n'}📧 support@freshlookaesthetics.com
+        {'\n'}📧 info@freshlook-ks.com
         {'\n\n'}
         2. Use the subject line:
         {'\n'}“Delete FreshWallet Account”
@@ -46,7 +46,7 @@ export default function DeleteAccountScreen() {
       <Text style={styles.heading}>Contact</Text>
       <Text style={styles.text}>
         If you have any questions, contact us at:
-        {'\n'}📧 support@freshlookaesthetics.com
+        {'\n'}📧 info@freshlook-ks.com
       </Text>
     </ScrollView>
   );
