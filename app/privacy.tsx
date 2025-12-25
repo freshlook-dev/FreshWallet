@@ -69,7 +69,7 @@ export default function PrivacyPolicyScreen() {
       <Text style={styles.text}>
         If you have any questions about this Privacy Policy, please contact us
         at:
-        {'\n'}📧 support@freshlookaesthetics.com
+        {'\n'}📧 info@freshlook-ks.com
       </Text>
     </ScrollView>
   );
