@@ -1,6 +1,6 @@
 'use client';
 
-import { ScrollView, Text, StyleSheet, View } from 'react-native';
+import { ScrollView, Text, StyleSheet } from 'react-native';
 import { Theme } from '../constants/theme';
 
 export default function PrivacyPolicyScreen() {
