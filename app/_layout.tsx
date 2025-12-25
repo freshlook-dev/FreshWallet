@@ -10,10 +10,16 @@ function AuthGate() {
   useEffect(() => {
     if (loading) return;
 
-    const inAuthGroup = segments[0] === '(auth)';
+    const firstSegment = segments[0];
+    const inAuthGroup = firstSegment === '(auth)';
+    const isPublicRoute = firstSegment === 'privacy';
+
+    // ✅ Allow public routes (Privacy Policy)
+    if (isPublicRoute) return;
 
     if (!user && !inAuthGroup) {
       router.replace('/(auth)');
+      return;
     }
 
     if (user && inAuthGroup) {
