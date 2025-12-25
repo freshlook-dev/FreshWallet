@@ -1,7 +1,14 @@
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+} from 'react-native';
 import { useEffect, useState } from 'react';
 import { supabase } from '../../context/supabase';
 import { useAuth } from '../../context/AuthContext';
+
+import { Theme } from '../../constants/theme';
 
 export default function HomeScreen() {
   const { user } = useAuth();
@@ -19,7 +26,7 @@ export default function HomeScreen() {
         .single();
 
       if (!error && data) {
-        setBalance(data.balance);
+        setBalance(data.balance ?? 0);
       }
 
       setLoading(false);
@@ -31,7 +38,10 @@ export default function HomeScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#C9A24D" />
+        <ActivityIndicator
+          size="large"
+          color={Theme.colors.primary}
+        />
       </View>
     );
   }
@@ -52,7 +62,11 @@ export default function HomeScreen() {
         </View>
 
         <Text style={styles.helper}>
-          Earn points by watching ads or completing tasks
+          Earn points by watching ads or completing tasks.
+        </Text>
+
+        <Text style={styles.disclaimer}>
+          Points have no cash value and can only be used for rewards.
         </Text>
       </View>
     </View>
@@ -64,68 +78,78 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   center: {
     flex: 1,
-    backgroundColor: '#FAF8F4',
+    backgroundColor: Theme.colors.background,
     justifyContent: 'center',
     alignItems: 'center',
   },
+
   container: {
     flex: 1,
-    backgroundColor: '#FAF8F4',
-    paddingHorizontal: 24,
-    paddingTop: 40,
+    backgroundColor: Theme.colors.background,
+    paddingHorizontal: Theme.spacing.lg,
+    paddingTop: Theme.spacing.xl,
   },
 
   /* Header */
   header: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#1F1F1F',
-    marginBottom: 6,
+    color: Theme.colors.textPrimary,
+    marginBottom: Theme.spacing.xs,
   },
+
   subheader: {
     fontSize: 15,
-    color: '#6B6B6B',
-    marginBottom: 32,
+    color: Theme.colors.textSecondary,
+    marginBottom: Theme.spacing.xl,
   },
 
   /* Card */
   card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 28,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 4,
+    backgroundColor: Theme.colors.card,
+    borderRadius: Theme.radius.lg,
+    padding: Theme.spacing.xl,
+    ...Theme.shadow.card,
   },
+
   cardLabel: {
     fontSize: 14,
     letterSpacing: 0.4,
-    color: '#6B6B6B',
-    marginBottom: 12,
+    color: Theme.colors.textMuted,
+    marginBottom: Theme.spacing.sm,
     textTransform: 'uppercase',
   },
+
   balanceRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    marginBottom: 12,
+    marginBottom: Theme.spacing.sm,
   },
+
   balance: {
     fontSize: 44,
     fontWeight: '800',
-    color: '#C9A24D',
-    marginRight: 6,
+    color: Theme.colors.primary,
+    marginRight: Theme.spacing.xs,
   },
+
   points: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#C9A24D',
+    color: Theme.colors.primary,
     marginBottom: 6,
   },
+
   helper: {
     fontSize: 14,
-    color: '#7A7A7A',
+    color: Theme.colors.textSecondary,
     lineHeight: 20,
+    marginBottom: Theme.spacing.xs,
+  },
+
+  disclaimer: {
+    fontSize: 12,
+    color: Theme.colors.textMuted,
+    lineHeight: 18,
   },
 });

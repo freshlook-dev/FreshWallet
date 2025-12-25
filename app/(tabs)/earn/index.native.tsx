@@ -7,26 +7,25 @@ import {
   Pressable,
   Alert,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { useEffect, useRef, useState } from 'react';
+
+import { supabase } from '../../../context/supabase';
+import { useAuth } from '../../../context/AuthContext';
+import { Theme } from '../../../constants/theme';
+
 import {
   RewardedAd,
   RewardedAdEventType,
   TestIds,
 } from 'react-native-google-mobile-ads';
 
-import { supabase } from '../../context/supabase';
-import { useAuth } from '../../context/AuthContext';
-
-/* ================= CONFIG ================= */
-
 const AD_UNIT_ID = __DEV__
   ? TestIds.REWARDED
   : 'ca-app-pub-6139607066788405/7709574753';
 
 const rewardAmount = 10;
-
-/* ================= SCREEN ================= */
 
 export default function EarnTab() {
   const { user, session } = useAuth();
@@ -35,7 +34,6 @@ export default function EarnTab() {
   const [loadingAd, setLoadingAd] = useState(true);
   const [showing, setShowing] = useState(false);
 
-  /* ---------- INIT AD ---------- */
   useEffect(() => {
     if (!user) return;
 
@@ -45,12 +43,9 @@ export default function EarnTab() {
 
     rewardedAd.current = ad;
 
-    const unsubLoaded = ad.addAdEventListener(
-      RewardedAdEventType.LOADED,
-      () => {
-        setLoadingAd(false);
-      }
-    );
+    const unsubLoaded = ad.addAdEventListener(RewardedAdEventType.LOADED, () => {
+      setLoadingAd(false);
+    });
 
     const unsubEarned = ad.addAdEventListener(
       RewardedAdEventType.EARNED_REWARD,
@@ -67,7 +62,6 @@ export default function EarnTab() {
     };
   }, [user]);
 
-  /* ---------- CALL EDGE FUNCTION ---------- */
   const rewardUser = async () => {
     if (!user || !session) return;
 
@@ -98,7 +92,6 @@ export default function EarnTab() {
     }
   };
 
-  /* ---------- SHOW AD ---------- */
   const showAd = async () => {
     if (!rewardedAd.current) return;
 
@@ -123,13 +116,11 @@ export default function EarnTab() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <Text style={styles.header}>Earn Fresh Points</Text>
       <Text style={styles.subheader}>
         Complete simple actions and grow your balance
       </Text>
 
-      {/* Earn Card */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Watch & Earn</Text>
 
@@ -142,101 +133,88 @@ export default function EarnTab() {
         </Text>
 
         <Pressable
-          style={[
-            styles.button,
-            (loadingAd || showing) && styles.disabled,
-          ]}
+          style={[styles.button, (loadingAd || showing) && styles.disabled]}
           onPress={showAd}
           disabled={loadingAd || showing}
         >
           {loadingAd || showing ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="#000" />
           ) : (
             <Text style={styles.buttonText}>Watch Ad</Text>
           )}
         </Pressable>
+
+        <Text style={styles.disclaimer}>
+          Points have no cash value and can only be used for rewards.
+        </Text>
       </View>
     </View>
   );
 }
 
-/* ================= STYLES ================= */
-
 const styles = StyleSheet.create({
   center: {
     flex: 1,
-    backgroundColor: '#FAF8F4',
+    backgroundColor: Theme.colors.background,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  muted: {
-    color: '#777',
-    fontSize: 15,
-  },
+  muted: { color: Theme.colors.textMuted, fontSize: 15 },
   container: {
     flex: 1,
-    backgroundColor: '#FAF8F4',
-    paddingHorizontal: 24,
-    paddingTop: 40,
+    backgroundColor: Theme.colors.background,
+    paddingHorizontal: Theme.spacing.lg,
+    paddingTop: Theme.spacing.xl,
   },
-
   header: {
     fontSize: 26,
     fontWeight: '700',
-    color: '#1F1F1F',
-    marginBottom: 6,
+    color: Theme.colors.textPrimary,
+    marginBottom: Theme.spacing.xs,
   },
   subheader: {
     fontSize: 15,
-    color: '#6B6B6B',
-    marginBottom: 28,
+    color: Theme.colors.textSecondary,
+    marginBottom: Theme.spacing.xl,
   },
-
   card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 22,
-    padding: 28,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 4,
+    backgroundColor: Theme.colors.card,
+    borderRadius: Theme.radius.xl,
+    padding: Theme.spacing.xl,
+    ...Theme.shadow.card,
   },
   cardTitle: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 12,
-    color: '#2B2B2B',
+    marginBottom: Theme.spacing.sm,
+    color: Theme.colors.textPrimary,
   },
   rewardValue: {
     fontSize: 36,
     fontWeight: '800',
-    color: '#C9A24D',
-    marginBottom: 8,
+    color: Theme.colors.primary,
+    marginBottom: Theme.spacing.xs,
   },
-  points: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
+  points: { fontSize: 18, fontWeight: '600', color: Theme.colors.primary },
   cardDescription: {
     fontSize: 14,
-    color: '#777',
+    color: Theme.colors.textSecondary,
     lineHeight: 20,
-    marginBottom: 24,
+    marginBottom: Theme.spacing.lg,
   },
-
   button: {
-    backgroundColor: '#C9A24D',
-    paddingVertical: 14,
-    borderRadius: 14,
+    backgroundColor: Theme.colors.primary,
+    paddingVertical: Theme.spacing.md,
+    borderRadius: Theme.radius.md,
     alignItems: 'center',
+    ...Theme.shadow.button,
   },
-  disabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 17,
-    fontWeight: '600',
+  disabled: { opacity: 0.6 },
+  buttonText: { color: '#000', fontSize: 17, fontWeight: '600' },
+  disclaimer: {
+    marginTop: Theme.spacing.md,
+    fontSize: 12,
+    color: Theme.colors.textMuted,
+    textAlign: 'center',
   },
 });

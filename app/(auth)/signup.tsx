@@ -10,10 +10,12 @@ import {
   Modal,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { supabase } from '../../context/supabase';
+import { Theme } from '../../constants/theme';
 
 const KOSOVO_CITIES = [
   'Prishtinë',
@@ -89,7 +91,7 @@ export default function SignupScreen() {
     }
 
     if (!agree) {
-      return setError('You must accept Terms & Privacy Policy');
+      return setError('You must accept the Privacy Policy');
     }
 
     try {
@@ -100,10 +102,6 @@ export default function SignupScreen() {
         email: email.trim(),
         password,
         options: {
-          emailRedirectTo:
-            Platform.OS === 'web'
-              ? 'http://localhost:8081'
-              : undefined,
           data: {
             full_name: fullName,
             gender,
@@ -115,8 +113,9 @@ export default function SignupScreen() {
 
       if (error) throw error;
 
-      alert(
-        'Account created successfully!\nPlease verify your email before logging in.'
+      Alert.alert(
+        'Account created',
+        'Please verify your email before logging in.'
       );
 
       router.replace('/');
@@ -141,7 +140,7 @@ export default function SignupScreen() {
       <View style={styles.card}>
         <TextInput
           placeholder="Full name"
-          placeholderTextColor="#999"
+          placeholderTextColor={Theme.colors.inputPlaceholder}
           value={fullName}
           onChangeText={setFullName}
           style={styles.input}
@@ -189,7 +188,13 @@ export default function SignupScreen() {
           style={styles.input}
           onPress={() => setCityModal(true)}
         >
-          <Text style={{ color: city ? '#1F1F1F' : '#999' }}>
+          <Text
+            style={{
+              color: city
+                ? Theme.colors.textPrimary
+                : Theme.colors.inputPlaceholder,
+            }}
+          >
             {city || 'Select city'}
           </Text>
         </Pressable>
@@ -197,7 +202,7 @@ export default function SignupScreen() {
         {/* Phone */}
         <TextInput
           placeholder="+383..."
-          placeholderTextColor="#999"
+          placeholderTextColor={Theme.colors.inputPlaceholder}
           value={phone}
           onChangeText={setPhone}
           keyboardType="phone-pad"
@@ -206,7 +211,7 @@ export default function SignupScreen() {
 
         <TextInput
           placeholder="Email address"
-          placeholderTextColor="#999"
+          placeholderTextColor={Theme.colors.inputPlaceholder}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -216,7 +221,7 @@ export default function SignupScreen() {
 
         <TextInput
           placeholder="Password"
-          placeholderTextColor="#999"
+          placeholderTextColor={Theme.colors.inputPlaceholder}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -232,21 +237,27 @@ export default function SignupScreen() {
 
         <TextInput
           placeholder="Confirm password"
-          placeholderTextColor="#999"
+          placeholderTextColor={Theme.colors.inputPlaceholder}
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
           style={styles.input}
         />
 
-        {/* Terms */}
+        {/* Privacy Policy */}
         <Pressable
           style={styles.checkboxRow}
           onPress={() => setAgree(!agree)}
         >
           <View style={[styles.checkbox, agree && styles.checked]} />
           <Text style={styles.checkboxText}>
-            I agree to the Terms & Privacy Policy
+            I agree to the{' '}
+            <Text
+              style={styles.policyLink}
+              onPress={() => router.push('../privacy')}
+            >
+              Privacy Policy
+            </Text>
           </Text>
         </Pressable>
 
@@ -262,7 +273,7 @@ export default function SignupScreen() {
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="#000" />
           ) : (
             <Text style={styles.buttonText}>Create account</Text>
           )}
@@ -297,7 +308,7 @@ export default function SignupScreen() {
           </ScrollView>
 
           <Pressable
-            style={[styles.button, { marginTop: 16 }]}
+            style={[styles.button, { marginTop: Theme.spacing.md }]}
             onPress={() => setCityModal(false)}
           >
             <Text style={styles.buttonText}>Close</Text>
@@ -313,8 +324,8 @@ export default function SignupScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAF8F4',
-    paddingHorizontal: 24,
+    backgroundColor: Theme.colors.background,
+    paddingHorizontal: Theme.spacing.lg,
   },
 
   logo: {
@@ -322,143 +333,166 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     textAlign: 'center',
     marginTop: 40,
-    color: '#1F1F1F',
+    color: Theme.colors.primary,
   },
+
   subtitle: {
     textAlign: 'center',
-    color: '#6B6B6B',
-    marginBottom: 28,
-    marginTop: 6,
+    color: Theme.colors.textSecondary,
+    marginBottom: Theme.spacing.xl,
+    marginTop: Theme.spacing.xs,
   },
 
   card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    padding: 22,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 18,
-    elevation: 3,
+    backgroundColor: Theme.colors.card,
+    borderRadius: Theme.radius.xl,
+    padding: Theme.spacing.lg,
+    ...Theme.shadow.card,
   },
 
   input: {
     borderWidth: 1,
-    borderColor: '#E6E6E6',
-    borderRadius: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    marginBottom: 14,
-    backgroundColor: '#FAFAFA',
+    borderColor: Theme.colors.inputBorder,
+    borderRadius: Theme.radius.md,
+    paddingVertical: Theme.spacing.md,
+    paddingHorizontal: Theme.spacing.md,
+    marginBottom: Theme.spacing.sm,
+    backgroundColor: Theme.colors.inputBackground,
+    color: Theme.colors.textPrimary,
   },
 
   genderRow: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 14,
+    gap: Theme.spacing.sm,
+    marginBottom: Theme.spacing.sm,
   },
+
   genderBtn: {
     flex: 1,
-    borderRadius: 14,
-    paddingVertical: 14,
+    borderRadius: Theme.radius.md,
+    paddingVertical: Theme.spacing.md,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E6E6E6',
-    backgroundColor: '#FAFAFA',
+    borderColor: Theme.colors.inputBorder,
+    backgroundColor: Theme.colors.inputBackground,
   },
+
   genderActive: {
-    backgroundColor: '#C9A24D',
-    borderColor: '#C9A24D',
+    backgroundColor: Theme.colors.primary,
+    borderColor: Theme.colors.primary,
   },
+
   genderText: {
-    color: '#6B6B6B',
+    color: Theme.colors.textSecondary,
     fontWeight: '600',
   },
+
   genderTextActive: {
-    color: '#FFFFFF',
+    color: '#000',
   },
 
   strength: {
     fontSize: 13,
-    color: '#6B6B6B',
-    marginBottom: 8,
+    color: Theme.colors.textMuted,
+    marginBottom: Theme.spacing.xs,
   },
+
   strengthValue: {
     fontWeight: '600',
-    color: '#1F1F1F',
+    color: Theme.colors.textPrimary,
   },
 
   checkboxRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    marginVertical: 14,
+    gap: Theme.spacing.sm,
+    marginVertical: Theme.spacing.sm,
   },
+
   checkbox: {
     width: 18,
     height: 18,
-    borderRadius: 5,
+    borderRadius: Theme.radius.xs,
     borderWidth: 1,
-    borderColor: '#C9A24D',
+    borderColor: Theme.colors.primary,
   },
+
   checked: {
-    backgroundColor: '#C9A24D',
+    backgroundColor: Theme.colors.primary,
   },
+
   checkboxText: {
-    color: '#2B2B2B',
+    color: Theme.colors.textSecondary,
     fontSize: 13,
   },
 
-  button: {
-    backgroundColor: '#C9A24D',
-    paddingVertical: 16,
-    borderRadius: 16,
-    alignItems: 'center',
-    marginTop: 8,
+  policyLink: {
+    textDecorationLine: 'underline',
+    color: Theme.colors.textPrimary,
+    fontWeight: '600',
   },
+
+  button: {
+    backgroundColor: Theme.colors.primary,
+    paddingVertical: Theme.spacing.md,
+    borderRadius: Theme.radius.lg,
+    alignItems: 'center',
+    marginTop: Theme.spacing.sm,
+    ...Theme.shadow.button,
+  },
+
   buttonText: {
-    color: '#FFFFFF',
+    color: '#000',
     fontWeight: '700',
     fontSize: 16,
   },
 
   link: {
     textAlign: 'center',
-    marginTop: 20,
-    color: '#6B6B6B',
+    marginTop: Theme.spacing.lg,
+    color: Theme.colors.textSecondary,
   },
+
   linkBold: {
-    color: '#1F1F1F',
+    color: Theme.colors.textPrimary,
     fontWeight: '600',
   },
 
   errorBox: {
-    backgroundColor: '#FDECEC',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 10,
+    backgroundColor: Theme.colors.surface,
+    borderRadius: Theme.radius.md,
+    padding: Theme.spacing.sm,
+    marginBottom: Theme.spacing.sm,
+    borderWidth: 1,
+    borderColor: Theme.colors.error,
   },
+
   errorText: {
-    color: '#C62828',
+    color: Theme.colors.error,
     fontSize: 13,
   },
 
   modalContainer: {
     flex: 1,
-    padding: 24,
-    backgroundColor: '#FAF8F4',
+    padding: Theme.spacing.lg,
+    backgroundColor: Theme.colors.background,
   },
+
   modalTitle: {
     fontSize: 22,
     fontWeight: '700',
-    marginBottom: 14,
+    marginBottom: Theme.spacing.sm,
+    color: Theme.colors.textPrimary,
   },
+
   cityItem: {
-    paddingVertical: 14,
+    paddingVertical: Theme.spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#E6E6E6',
+    borderBottomColor: Theme.colors.divider,
   },
+
   cityText: {
     fontSize: 16,
-    color: '#1F1F1F',
+    color: Theme.colors.textPrimary,
   },
 });

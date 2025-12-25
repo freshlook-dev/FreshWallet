@@ -1,9 +1,29 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { Platform } from 'react-native';
+
+import { Theme } from '../../constants/theme';
 
 export default function TabsLayout() {
   return (
-    <Tabs screenOptions={{ headerShown: false }}>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: Theme.colors.card,
+          borderTopColor: Theme.colors.border,
+          borderTopWidth: 1,
+          height: Platform.OS === 'ios' ? 90 : 70,
+          paddingTop: 6,
+        },
+        tabBarActiveTintColor: Theme.colors.primary,
+        tabBarInactiveTintColor: Theme.colors.iconInactive,
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+        },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
@@ -14,8 +34,9 @@ export default function TabsLayout() {
         }}
       />
 
+      {/* ✅ FIXED HERE */}
       <Tabs.Screen
-        name="earn"
+        name="earn/index"
         options={{
           title: 'Earn',
           tabBarIcon: ({ color, size }) => (
@@ -44,21 +65,9 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* 🔒 HIDDEN SCREEN */}
-      <Tabs.Screen
-        name="scanner"
-        options={{
-          href: null, // 👈 hides from tab bar
-        }}
-      />
-
-      <Tabs.Screen
-  name="history"
-  options={{
-    href: null, // hidden screen
-  }}
-/>
-
+      <Tabs.Screen name="scanner" options={{ href: null }} />
+      <Tabs.Screen name="staff-history" options={{ href: null }} />
+      <Tabs.Screen name="history" options={{ href: null }} />
     </Tabs>
   );
 }

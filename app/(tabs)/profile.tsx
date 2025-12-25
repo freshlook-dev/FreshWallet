@@ -1,8 +1,15 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../context/supabase';
 import { useEffect, useState } from 'react';
+
+import { Theme } from '../../constants/theme';
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
@@ -34,34 +41,58 @@ export default function ProfileScreen() {
         <Text style={styles.email}>{user?.email}</Text>
 
         <View style={styles.roleBadge}>
-          <Text style={styles.roleText}>{role.toUpperCase()}</Text>
+          <Text style={styles.roleText}>
+            {role.toUpperCase()}
+          </Text>
         </View>
       </View>
 
       {/* Actions */}
       <View style={styles.actions}>
-        {(role === 'staff' || role === 'admin') && (
-          <Pressable
-            style={styles.actionButton}
-            onPress={() => router.push('../scanner')}
-          >
-            <Text style={styles.actionText}>Open QR Scanner</Text>
-          </Pressable>
-        )}
-
-        {(role === 'staff' || role === 'admin') && (
+        {/* 👤 USER ONLY */}
+        {role === 'user' && (
           <Pressable
             style={styles.actionButton}
             onPress={() => router.push('/history')}
           >
-            <Text style={styles.actionText}>Redemption History</Text>
+            <Text style={styles.actionText}>
+              My Redemptions
+            </Text>
           </Pressable>
+        )}
+
+        {/* 🧑‍💼 STAFF / ADMIN */}
+        {(role === 'staff' || role === 'admin') && (
+          <>
+            <Pressable
+              style={styles.actionButton}
+              onPress={() => router.push('/scanner')}
+            >
+              <Text style={styles.actionText}>
+                Open QR Scanner
+              </Text>
+            </Pressable>
+
+            <Pressable
+              style={styles.actionButton}
+              onPress={() => router.push('../staff-history')}
+            >
+              <Text style={styles.actionText}>
+                Staff Redemption History
+              </Text>
+            </Pressable>
+          </>
         )}
       </View>
 
       {/* Logout */}
-      <Pressable style={styles.logoutButton} onPress={signOut}>
-        <Text style={styles.logoutText}>Log out</Text>
+      <Pressable
+        style={styles.logoutButton}
+        onPress={signOut}
+      >
+        <Text style={styles.logoutText}>
+          Log out
+        </Text>
       </Pressable>
     </View>
   );
@@ -72,87 +103,91 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAF8F4',
-    paddingHorizontal: 24,
-    paddingTop: 36,
+    backgroundColor: Theme.colors.background,
+    paddingHorizontal: Theme.spacing.lg,
+    paddingTop: Theme.spacing.xl,
   },
 
   header: {
     fontSize: 26,
     fontWeight: '700',
-    color: '#1F1F1F',
-    marginBottom: 4,
+    color: Theme.colors.textPrimary,
+    marginBottom: Theme.spacing.xs,
   },
+
   subheader: {
     fontSize: 15,
-    color: '#6B6B6B',
-    marginBottom: 28,
+    color: Theme.colors.textSecondary,
+    marginBottom: Theme.spacing.xl,
   },
 
   card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 22,
-    padding: 22,
-    marginBottom: 28,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 16,
-    elevation: 3,
+    backgroundColor: Theme.colors.card,
+    borderRadius: Theme.radius.xl,
+    padding: Theme.spacing.lg,
+    marginBottom: Theme.spacing.xl,
+    ...Theme.shadow.card,
   },
+
   cardLabel: {
     fontSize: 13,
-    color: '#777',
-    marginBottom: 6,
+    color: Theme.colors.textMuted,
+    marginBottom: Theme.spacing.xs,
   },
+
   email: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#2B2B2B',
-    marginBottom: 14,
+    color: Theme.colors.textPrimary,
+    marginBottom: Theme.spacing.sm,
   },
 
   roleBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: '#FAF4E8',
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 20,
+    backgroundColor: Theme.colors.surface,
+    paddingHorizontal: Theme.spacing.md,
+    paddingVertical: Theme.spacing.xs,
+    borderRadius: Theme.radius.lg,
+    borderWidth: 1,
+    borderColor: Theme.colors.primary,
   },
+
   roleText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#C9A24D',
+    color: Theme.colors.primary,
   },
 
   actions: {
-    gap: 14,
-    marginBottom: 40,
+    gap: Theme.spacing.sm,
+    marginBottom: Theme.spacing.xxl,
   },
+
   actionButton: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 10,
-    elevation: 2,
+    backgroundColor: Theme.colors.card,
+    borderRadius: Theme.radius.lg,
+    paddingVertical: Theme.spacing.md,
+    paddingHorizontal: Theme.spacing.lg,
+    ...Theme.shadow.card,
   },
+
   actionText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#2B2B2B',
+    color: Theme.colors.textPrimary,
   },
 
   logoutButton: {
     marginTop: 'auto',
-    backgroundColor: '#2B2B2B',
-    borderRadius: 18,
-    paddingVertical: 16,
+    backgroundColor: Theme.colors.error,
+    borderRadius: Theme.radius.lg,
+    paddingVertical: Theme.spacing.md,
     alignItems: 'center',
+    ...Theme.shadow.button,
   },
+
   logoutText: {
-    color: '#FFFFFF',
+    color: Theme.colors.textPrimary,
     fontSize: 16,
     fontWeight: '700',
   },

@@ -15,6 +15,8 @@ import { supabase } from '../../context/supabase';
 import { useAuth } from '../../context/AuthContext';
 import QRCode from 'react-native-qrcode-svg';
 
+import { Theme } from '../../constants/theme';
+
 type Reward = {
   id: string;
   title: string;
@@ -108,7 +110,7 @@ export default function RewardsScreen() {
             ]}
           >
             {loading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color="#000" />
             ) : (
               <Text style={styles.redeemText}>
                 {canRedeem ? 'Redeem' : 'Locked'}
@@ -131,7 +133,9 @@ export default function RewardsScreen() {
       {/* Balance Card */}
       <View style={styles.balanceCard}>
         <Text style={styles.balanceValue}>{points}</Text>
-        <Text style={styles.balanceLabel}>Fresh Points Available</Text>
+        <Text style={styles.balanceLabel}>
+          Fresh Points Available
+        </Text>
       </View>
 
       {/* Rewards List */}
@@ -139,7 +143,7 @@ export default function RewardsScreen() {
         data={rewards}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: Theme.spacing.xl }}
         showsVerticalScrollIndicator={false}
       />
 
@@ -151,14 +155,24 @@ export default function RewardsScreen() {
               Show this QR to our staff
             </Text>
 
-            {qrToken && <QRCode value={qrToken} size={220} />}
+            {qrToken && (
+              <QRCode
+                value={qrToken}
+                size={220}
+                backgroundColor="transparent"
+                color={Theme.colors.textPrimary}
+              />
+            )}
 
             <Text style={styles.modalHint}>
               Valid for 10 minutes • One-time use
             </Text>
 
             <Pressable
-              style={[styles.redeemButton, { marginTop: 24 }]}
+              style={[
+                styles.redeemButton,
+                { marginTop: Theme.spacing.lg },
+              ]}
               onPress={() => {
                 setQrVisible(false);
                 setQrToken(null);
@@ -178,90 +192,93 @@ export default function RewardsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAF8F4',
-    paddingHorizontal: 20,
-    paddingTop: 32,
+    backgroundColor: Theme.colors.background,
+    paddingHorizontal: Theme.spacing.lg,
+    paddingTop: Theme.spacing.xl,
   },
 
   header: {
     fontSize: 26,
     fontWeight: '700',
-    color: '#1F1F1F',
-    marginBottom: 6,
+    color: Theme.colors.textPrimary,
+    marginBottom: Theme.spacing.xs,
   },
+
   subheader: {
     fontSize: 15,
-    color: '#6B6B6B',
-    marginBottom: 22,
+    color: Theme.colors.textSecondary,
+    marginBottom: Theme.spacing.lg,
   },
 
   balanceCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 22,
-    paddingVertical: 24,
+    backgroundColor: Theme.colors.card,
+    borderRadius: Theme.radius.xl,
+    paddingVertical: Theme.spacing.xl,
     alignItems: 'center',
-    marginBottom: 24,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 16,
-    elevation: 4,
+    marginBottom: Theme.spacing.lg,
+    ...Theme.shadow.card,
   },
+
   balanceValue: {
     fontSize: 38,
     fontWeight: '800',
-    color: '#C9A24D',
+    color: Theme.colors.primary,
   },
+
   balanceLabel: {
     fontSize: 14,
-    color: '#777',
-    marginTop: 6,
+    color: Theme.colors.textSecondary,
+    marginTop: Theme.spacing.xs,
   },
 
   rewardCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 18,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 12,
-    elevation: 2,
+    backgroundColor: Theme.colors.card,
+    borderRadius: Theme.radius.lg,
+    padding: Theme.spacing.md,
+    marginBottom: Theme.spacing.sm,
+    ...Theme.shadow.card,
   },
+
   rewardTitle: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#2B2B2B',
-    marginBottom: 6,
+    color: Theme.colors.textPrimary,
+    marginBottom: Theme.spacing.xs,
   },
+
   rewardDesc: {
     fontSize: 14,
-    color: '#777',
+    color: Theme.colors.textSecondary,
     lineHeight: 20,
   },
 
   rewardFooter: {
-    marginTop: 14,
+    marginTop: Theme.spacing.sm,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+
   rewardPoints: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#C9A24D',
+    color: Theme.colors.primary,
   },
 
   redeemButton: {
-    backgroundColor: '#C9A24D',
-    paddingVertical: 10,
-    paddingHorizontal: 22,
-    borderRadius: 14,
+    backgroundColor: Theme.colors.primary,
+    paddingVertical: Theme.spacing.sm,
+    paddingHorizontal: Theme.spacing.lg,
+    borderRadius: Theme.radius.md,
+    ...Theme.shadow.button,
   },
+
   redeemDisabled: {
-    backgroundColor: '#DDD',
+    backgroundColor: Theme.colors.border,
   },
+
   redeemText: {
-    color: '#fff',
+    color: '#000',
     fontWeight: '600',
     fontSize: 15,
   },
@@ -272,26 +289,30 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.55)',
+    backgroundColor: 'rgba(0,0,0,0.7)',
     justifyContent: 'center',
     alignItems: 'center',
   },
+
   modalCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 22,
-    padding: 26,
+    backgroundColor: Theme.colors.card,
+    borderRadius: Theme.radius.xl,
+    padding: Theme.spacing.lg,
     alignItems: 'center',
     width: '85%',
+    ...Theme.shadow.card,
   },
+
   modalTitle: {
     fontSize: 18,
     fontWeight: '700',
-    marginBottom: 18,
-    color: '#1F1F1F',
+    marginBottom: Theme.spacing.lg,
+    color: Theme.colors.textPrimary,
   },
+
   modalHint: {
-    marginTop: 12,
+    marginTop: Theme.spacing.sm,
     fontSize: 12,
-    color: '#777',
+    color: Theme.colors.textMuted,
   },
 });

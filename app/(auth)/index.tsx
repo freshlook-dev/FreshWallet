@@ -8,9 +8,11 @@ import {
 } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-import { supabase } from '../../context/supabase';
+import { useAuth } from '../../context/AuthContext';
+import { Theme } from '../../constants/theme';
 
 export default function LoginScreen() {
+  const { signIn } = useAuth();
   const router = useRouter();
 
   const [email, setEmail] = useState('');
@@ -23,69 +25,14 @@ export default function LoginScreen() {
       setLoading(true);
       setError(null);
 
-      // 🔐 SIGN IN
-      const { error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
+      await signIn(email.trim(), password);
 
-      if (error) throw error;
-
-      // 🔄 IMPORTANT: REFRESH USER SESSION
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        throw new Error('User session not found');
-      }
-
-      // 🚫 BLOCK UNVERIFIED USERS
-      if (!user.email_confirmed_at) {
-        await supabase.auth.signOut();
-        setError('Please verify your email before logging in.');
-        return;
-      }
-
-      // ✅ COPY METADATA → PROFILE (NOW GUARANTEED)
-      await supabase
-        .from('profiles')
-        .update({
-          full_name: user.user_metadata?.full_name ?? null,
-          gender: user.user_metadata?.gender ?? null,
-          city: user.user_metadata?.city ?? null,
-          phone: user.user_metadata?.phone ?? null,
-        })
-        .eq('id', user.id);
-
-      // ❗ DO NOT NAVIGATE HERE
-      // TabsLayout will redirect automatically
-
+      // ✅ DO NOT NAVIGATE
+      // app/index.tsx will redirect automatically
     } catch (err: any) {
       setError(err.message || 'Login failed');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const resendVerification = async () => {
-    if (!email) {
-      Alert.alert('Please enter your email first');
-      return;
-    }
-
-    const { error } = await supabase.auth.resend({
-      type: 'signup',
-      email: email.trim(),
-    });
-
-    if (error) {
-      Alert.alert('Error', error.message);
-    } else {
-      Alert.alert(
-        'Email sent',
-        'Verification email has been resent. Check your inbox or spam.'
-      );
     }
   };
 
@@ -95,6 +42,7 @@ export default function LoginScreen() {
 
       <TextInput
         placeholder="Email"
+        placeholderTextColor={Theme.colors.inputPlaceholder}
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
@@ -104,6 +52,7 @@ export default function LoginScreen() {
 
       <TextInput
         placeholder="Password"
+        placeholderTextColor={Theme.colors.inputPlaceholder}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -122,7 +71,6 @@ export default function LoginScreen() {
         </Text>
       </Pressable>
 
-
       <Pressable onPress={() => router.replace('/signup')}>
         <Text style={styles.link}>Create account</Text>
       </Pressable>
@@ -136,45 +84,47 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 24,
-    backgroundColor: '#FAF8F4',
+    padding: Theme.spacing.lg,
+    backgroundColor: Theme.colors.background,
   },
   title: {
     fontSize: 30,
     fontWeight: '700',
     textAlign: 'center',
-    marginBottom: 24,
-    color: '#2B2B2B',
+    marginBottom: Theme.spacing.xl,
+    color: Theme.colors.primary,
   },
   input: {
+    backgroundColor: Theme.colors.inputBackground,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 12,
-    backgroundColor: '#fff',
+    borderColor: Theme.colors.inputBorder,
+    borderRadius: Theme.radius.md,
+    padding: Theme.spacing.md,
+    marginBottom: Theme.spacing.sm,
+    color: Theme.colors.textPrimary,
   },
   button: {
-    backgroundColor: '#C9A24D',
-    padding: 16,
-    borderRadius: 10,
-    marginTop: 6,
+    backgroundColor: Theme.colors.primary,
+    padding: Theme.spacing.md,
+    borderRadius: Theme.radius.md,
+    marginTop: Theme.spacing.sm,
+    ...Theme.shadow.button,
   },
   buttonText: {
-    color: '#fff',
+    color: '#000',
     textAlign: 'center',
     fontWeight: '700',
     fontSize: 16,
   },
   link: {
     textAlign: 'center',
-    marginTop: 16,
-    color: '#2B2B2B',
+    marginTop: Theme.spacing.lg,
+    color: Theme.colors.textSecondary,
     fontWeight: '500',
   },
   error: {
-    color: '#C62828',
+    color: Theme.colors.error,
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: Theme.spacing.sm,
   },
 });

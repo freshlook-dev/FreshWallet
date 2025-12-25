@@ -1,11 +1,15 @@
+'use client';
+
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
 
 import { supabase } from '../../context/supabase';
 import { useAuth } from '../../context/AuthContext';
@@ -14,16 +18,36 @@ import { Theme } from '../../constants/theme';
 type Redemption = {
   id: string;
   points: number;
-  redeemed_at: string | null;
+  redeemed_at: string;
+  user_id: string;
+  staff_id: string | null;
 };
 
-export default function RedemptionHistoryScreen() {
+export default function StaffRedemptionHistoryScreen() {
   const { user } = useAuth();
+  const router = useRouter();
 
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<Redemption[]>([]);
 
-  /* 📜 LOAD USER HISTORY */
+  /* 🔐 STAFF / ADMIN PROTECTION */
+  useEffect(() => {
+    if (!user) return;
+
+    supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (data?.role !== 'staff' && data?.role !== 'admin') {
+          Alert.alert('Access denied', 'Staff only');
+          router.replace('/');
+        }
+      });
+  }, [user]);
+
+  /* 📜 LOAD GLOBAL HISTORY */
   useEffect(() => {
     if (!user) return;
 
@@ -32,10 +56,10 @@ export default function RedemptionHistoryScreen() {
 
       const { data, error } = await supabase
         .from('redemptions')
-        .select('id, points, redeemed_at')
-        .eq('user_id', user.id)
+        .select('id, points, redeemed_at, user_id, staff_id')
         .eq('used', true)
-        .order('redeemed_at', { ascending: false });
+        .order('redeemed_at', { ascending: false })
+        .limit(200);
 
       if (!error && data) {
         setItems(data);
@@ -59,7 +83,7 @@ export default function RedemptionHistoryScreen() {
     return (
       <View style={styles.center}>
         <Text style={styles.emptyText}>
-          You haven’t redeemed any rewards yet.
+          No redemptions have been recorded yet.
         </Text>
       </View>
     );
@@ -68,9 +92,9 @@ export default function RedemptionHistoryScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <Text style={styles.header}>My Redemptions</Text>
+      <Text style={styles.header}>All Redemptions</Text>
       <Text style={styles.subheader}>
-        Your redeemed rewards history
+        Global redemption activity
       </Text>
 
       <FlatList
@@ -85,13 +109,19 @@ export default function RedemptionHistoryScreen() {
                 {item.points} pts
               </Text>
               <Text style={styles.date}>
-                {item.redeemed_at
-                  ? new Date(item.redeemed_at).toLocaleString()
-                  : '-'}
+                {new Date(item.redeemed_at).toLocaleString()}
               </Text>
             </View>
 
-            <Text style={styles.status}>Redeemed</Text>
+            <Text style={styles.meta}>
+              User: {item.user_id.slice(0, 8)}…
+            </Text>
+
+            {item.staff_id && (
+              <Text style={styles.meta}>
+                Staff: {item.staff_id.slice(0, 8)}…
+              </Text>
+            )}
           </View>
         )}
       />
@@ -161,10 +191,9 @@ const styles = StyleSheet.create({
     color: Theme.colors.textMuted,
   },
 
-  status: {
+  meta: {
     marginTop: Theme.spacing.xs,
     fontSize: 13,
-    fontWeight: '600',
     color: Theme.colors.textSecondary,
   },
 });
